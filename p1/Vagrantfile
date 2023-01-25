@@ -1,8 +1,8 @@
 Vagrant.configure(2) do |config|
   config.vm.box = "centos/7"
-  config.vm.box_url = "/home/msndie/stuff/CentOS-7-x86_64-Vagrant-2004_01.VirtualBox.box"
+  config.vm.box_url = "/home/sclam/IoT/virtualbox.box"
   config.vm.provision "shell", inline: <<-SHELL
-    yum install net-tools -y
+    # yum install net-tools -y
   SHELL
 
   config.vm.define "sclamS" do |server|
