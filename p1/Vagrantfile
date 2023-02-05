@@ -2,8 +2,8 @@
 # vi: set ft=ruby :
 
 Vagrant.configure(2) do |config|
-  config.vm.box = "ubuntu/trusty64"
-  config.vm.box_url = "/home/msnd/stuff/IoT/virtualbox_bubuntu.box"
+  config.vm.box = "centos/7"
+  config.vm.box_url = "/home/msnd/stuff/virtualbox7.box"
   # config.vm.provision "shell", inline: <<-SHELL
     # yum install net-tools -y
   # SHELL
@@ -11,44 +11,51 @@ Vagrant.configure(2) do |config|
   config.vm.define "sclamS" do |server|
     server.vm.hostname = "sclamS"
     server.vm.network "private_network", ip: "192.168.56.110"
-    server.vm.synced_folder ".", "/mnt", type: "virtualbox"
     server.vm.provider "virtualbox" do |v|
-      v.customize ["modifyvm", :id, "--name", "sclamS"]
+      v.name = "sclamS"
+      #v.customize ["modifyvm", :id, "--name", "sclamS"]
       v.memory = 512
       v.cpus = 1
     end
-    server.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "/tmp/id_rsa.pub"
+    #server.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "/tmp/id_rsa.pub"
     #server.vm.provision "file", source: "~/.ssh/id_rsa", destination: "/tmp/id_rsa"
     server.vm.provision :shell, inline: <<-SHELL
-      echo "[SCRIPT] Copy ssh key"
-      cat /tmp/id_rsa.pub >> ~/.ssh/authorized_keys
+      #echo "[SCRIPT] Copy ssh key"
+      #cat /tmp/id_rsa.pub >> ~/.ssh/authorized_keys
       echo "[SCRIPT] Install k3s"
       curl -sfL https://get.k3s.io/ | sh -s - --write-kubeconfig-mode 644
       echo "[SCRIPT] Copy token"
-      cp /var/lib/rancher/k3s/server/node-token /mnt
+      echo $(sudo cat /var/lib/rancher/k3s/server/node-token) > /vagrant/.token
+      #cp /var/lib/rancher/k3s/server/node-token /vagrant/
     SHELL
+    server.trigger.after :up do |trigger|
+      trigger.run = {inline: "vagrant scp sclamS:/vagrant/.token ."}
+    end
   end
 
   config.vm.define "sclamSW" do |worker|
     worker.vm.hostname = "slcamSW"
     worker.vm.network "private_network", ip: "192.168.56.111"
-    worker.vm.synced_folder ".", "/mnt", type: "virtualbox"
     worker.vm.provider "virtualbox" do |v|
-      v.customize ["modifyvm", :id, "--name", "sclamSW"]
+      v.name = "sclamSW"
+      #v.customize ["modifyvm", :id, "--name", "sclamSW"]
       v.memory = 512
       v.cpus = 1
     end
-    worker.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "/tmp/id_rsa.pub"
+    #worker.vm.provision "file", source: "~/.ssh/id_rsa.pub", destination: "/tmp/id_rsa.pub"
     #worker.vm.provision "file", source: "~/.ssh/id_rsa", destination: "~/.ssh/id_rsa"
     worker.vm.provision :shell, inline: <<-SHELL
-      echo "[SCRIPT] Add host to /etc/hosts"
+      echo "[SCRIPT] Add master to /etc/hosts"
       echo "192.168.56.110 sclamS" >> /etc/hosts
-      echo "[SCRIPT] Copy ssh key"
-      cat /tmp/id_rsa.pub >> ~/.ssh/authorized_keys
+      #echo "[SCRIPT] Copy ssh key"
+      #cat /tmp/id_rsa.pub >> ~/.ssh/authorized_keys
       #echo "[SCRIPT] Copy token from master"
       #scp root@sclamS:/var/lib/rancher/k3s/server/token /tmp/token
       echo "[SCRIPT] Install k3s"
-      curl -sfL https://get.k3s.io/ | INSTALL_K3S_EXEC="agent --server https://sclamS:6443 --token-file /mnt/node-token" sh -
+      curl -sfL https://get.k3s.io/ | INSTALL_K3S_EXEC="agent --server https://sclamS:6443 --token-file /vagrant/.token" sh -
     SHELL
+    worker.trigger.after :up do |trigger|
+      trigger.run = {inline: "rm .token"}
+    end
   end
 end
