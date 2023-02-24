@@ -17,7 +17,7 @@ echo -e "${YELLOW}[SCRIPT] Creating namespaces${NC}"
 kubectl create namespace argocd
 kubectl create namespace dev
 
-echo -e "${YELLOW}[SCRIPT] Applying manifests${NC}"
+echo -e "${YELLOW}[SCRIPT] Applying argocd manifests${NC}"
 kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
 
 echo -e "${YELLOW}[SCRIPT] Waiting for argocd to be ready${NC}"
@@ -28,6 +28,12 @@ kubectl wait --for=condition=Ready pods --all -n argocd
 
 # echo -e "${YELLOW}[SCRIPT] Waiting for argocd to be ready${NC}"
 # kubectl wait --for=condition=Ready pods --all -n argocd
+
+echo -e "${YELLOW}[SCRIPT] Applying argocd project manifest${NC}"
+kubectl apply -n argocd -f ../confs/project.yaml
+
+echo -e "${YELLOW}[SCRIPT] Port forwarding${NC}"
+kubectl port-forward svc/argocd-server -n argocd 8080:443
 
 echo -e "${YELLOW}[SCRIPT] Retrieving password for argocd${NC}"
 pass=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)

@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: playground-app
+  labels:
+    app: playground-app
+spec:
+  destination:
+    namespace: dev
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: manifests
+    repoURL: 'https://github.com/msndie/Sclam-IoT-for-ARGO-CD.git'
+    targetRevision: HEAD
+    directory:
+      recurese: true
+  project: development
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
