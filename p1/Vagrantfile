@@ -3,7 +3,7 @@
 
 Vagrant.configure(2) do |config|
   config.vm.box = "centos/7"
-  config.vm.box_url = "/home/msnd/stuff/virtualbox7.box"
+  config.vm.box_url = "/home/sclam/virtualbox.box"
 
   config.vm.define "sclamS" do |server|
     server.vm.hostname = "sclamS"
@@ -13,14 +13,7 @@ Vagrant.configure(2) do |config|
       v.memory = 512
       v.cpus = 1
     end
-    server.vm.provision :shell, inline: <<-SHELL
-      echo "[SCRIPT] Install k3s"
-      curl -sfL https://get.k3s.io/ | sh -s - --write-kubeconfig-mode 644
-      echo "[SCRIPT] Copy token"
-      echo $(sudo cat /var/lib/rancher/k3s/server/node-token) > /vagrant/.token
-      echo "[SCRIPT] Waiting"
-      kubectl wait --for=condition=Ready node/sclams
-    SHELL
+    server.vm.provision "shell", privileged: true, path: "./scripts/server.sh"
     server.trigger.after :up do |trigger|
       trigger.run = {inline: "vagrant scp sclamS:/vagrant/.token ."}
     end
@@ -34,13 +27,7 @@ Vagrant.configure(2) do |config|
       v.memory = 512
       v.cpus = 1
     end
-    worker.vm.provision "file", source: ".token", destination: "/vagrant/.token"
-    worker.vm.provision :shell, inline: <<-SHELL
-      echo "[SCRIPT] Add master to /etc/hosts"
-      echo "192.168.56.110 sclamS" >> /etc/hosts
-      echo "[SCRIPT] Install k3s"
-      curl -sfL https://get.k3s.io | K3S_URL=https://sclamS:6443 K3S_TOKEN=$(cat /vagrant/.token) sh -
-    SHELL
+    worker.vm.provision "shell", privileged: true, path: "./scripts/worker.sh"
     worker.trigger.after :up do |trigger|
       trigger.run = {inline: "rm .token"}
     end
