@@ -11,7 +11,7 @@ if [ "$EUID" -ne 0 ]
 fi
 
 echo -e "${YELLOW}[SCRIPT] Creating cluster${NC}"
-k3d cluster create dev-cluster --api-port 6443 -p 8080:80@loadbalancer --agents 2 --wait
+k3d cluster create dev-cluster --api-port 6443 --port 8080:80@loadbalancer --port 8888:8888@loadbalancer --wait
 
 echo -e "${YELLOW}[SCRIPT] Creating namespaces${NC}"
 kubectl create namespace argocd
@@ -23,17 +23,15 @@ kubectl apply -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/st
 echo -e "${YELLOW}[SCRIPT] Waiting for argocd to be ready${NC}"
 kubectl wait --for=condition=Ready pods --all -n argocd
 
-# echo -e "${YELLOW}[SCRIPT] Applying manifests${NC}"
-# kubectl apply -n argocd -f ../confs/ingress.yaml
+echo -e "${YELLOW}[SCRIPT] Applying argocd project and application manifests${NC}"
+kubectl apply -n argocd -f ../confs
 
-# echo -e "${YELLOW}[SCRIPT] Waiting for argocd to be ready${NC}"
-# kubectl wait --for=condition=Ready pods --all -n argocd
+# echo -e "${YELLOW}[SCRIPT] Port forwarding${NC}"
+# kubectl port-forward svc/argocd-server -n argocd 8080:443
+kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
 
-echo -e "${YELLOW}[SCRIPT] Applying argocd project manifest${NC}"
-kubectl apply -n argocd -f ../confs/project.yaml
-
-echo -e "${YELLOW}[SCRIPT] Port forwarding${NC}"
-kubectl port-forward svc/argocd-server -n argocd 8080:443
+echo -e "${YELLOW}[SCRIPT] Waiting for argocd to be ready${NC}"
+kubectl wait --for=condition=Ready pods --all -n argocd
 
 echo -e "${YELLOW}[SCRIPT] Retrieving password for argocd${NC}"
 pass=$(kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d)

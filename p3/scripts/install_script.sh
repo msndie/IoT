@@ -5,6 +5,7 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
+# TODO change for ubuntu
 echo "[SCRIPT] Installing docker"
 pacman -S --needed docker
 

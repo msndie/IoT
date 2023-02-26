@@ -8,7 +8,7 @@ spec:
   # Project description
   description: Dev ArgoCD Project to deploy our app locally 
   sourceRepos:
-  - "https://github.com/sclam/*"
+  - "https://github.com/msndie/*"
   # Only permit to deploy applications in the same cluster
   destinations:
   - namespace: dev

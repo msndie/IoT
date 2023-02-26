@@ -13,7 +13,7 @@ spec:
     repoURL: 'https://github.com/msndie/Sclam-IoT-for-ARGO-CD.git'
     targetRevision: HEAD
     directory:
-      recurese: true
+      recurse: true
   project: development
   syncPolicy:
     automated:
