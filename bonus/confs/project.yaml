@@ -1,0 +1,18 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: gitlab-development
+  labels:
+    app: gitlab-development
+spec:
+  # Project description
+  description: Dev ArgoCD Project to deploy our app locally 
+  sourceRepos:
+  - ""
+  # Only permit to deploy applications in the same cluster
+  destinations:
+  - namespace: dev
+    server: https://kubernetes.default.svc
+  # Enables namespace orphaned resource monitoring.
+  orphanedResources:
+    warn: false

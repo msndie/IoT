@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gitlab-playground-app
+  labels:
+    app: gitlab-playground-app
+spec:
+  destination:
+    namespace: dev
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: manifests
+    repoURL: ''
+    targetRevision: HEAD
+    directory:
+      recurse: true
+  project: gitlab-development
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
