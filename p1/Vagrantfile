@@ -3,33 +3,28 @@
 
 Vagrant.configure(2) do |config|
   config.vm.box = "centos/7"
-  config.vm.box_url = "/home/sclam/virtualbox.box"
+  config.vm.box_url = "/home/sclam/libvirt.box"
+  config.vm.provision "shell", inline: <<-SHELL
+    yum install -y net-tools
+  SHELL
 
   config.vm.define "sclamS" do |server|
     server.vm.hostname = "sclamS"
     server.vm.network "private_network", ip: "192.168.56.110"
-    server.vm.provider "virtualbox" do |v|
-      v.name = "sclamS"
+    server.vm.provider "libvirt" do |v|
       v.memory = 1024
       v.cpus = 1
     end
     server.vm.provision "shell", privileged: true, path: "./scripts/server.sh"
-    server.trigger.after :up do |trigger|
-      trigger.run = {inline: "vagrant scp sclamS:/vagrant/.token ."}
-    end
   end
 
   config.vm.define "sclamSW" do |worker|
     worker.vm.hostname = "slcamSW"
     worker.vm.network "private_network", ip: "192.168.56.111"
-    worker.vm.provider "virtualbox" do |v|
-      v.name = "sclamSW"
+    worker.vm.provider "libvirt" do |v|
       v.memory = 512
       v.cpus = 1
     end
     worker.vm.provision "shell", privileged: true, path: "./scripts/worker.sh"
-    worker.trigger.after :up do |trigger|
-      trigger.run = {inline: "rm .token"}
-    end
   end
 end

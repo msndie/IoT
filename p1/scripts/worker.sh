@@ -9,4 +9,4 @@ echo -e "${YELLOW}[SCRIPT] Add master to /etc/hosts${NC}"
 echo "192.168.56.110 sclamS" >> /etc/hosts
 
 echo -e "${YELLOW}[SCRIPT] Install k3s${NC}"
-curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" K3S_URL=https://sclamS:6443 K3S_TOKEN=$(cat /vagrant/.token) INSTALL_K3S_EXEC="--flannel-iface eth1" sh -s -
+curl -sfL https://get.k3s.io | K3S_KUBECONFIG_MODE="644" K3S_URL=https://sclamS:6443 K3S_TOKEN="IoT-Token" INSTALL_K3S_EXEC="--flannel-iface eth1" sh -s -

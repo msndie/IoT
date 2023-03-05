@@ -10,13 +10,11 @@ if [ "$EUID" -ne 0 ]
   exit
 fi
 
-# TODO change for ubuntu
 echo -e "${YELLOW}[SCRIPT] Installing docker${NC}"
-pacman -S --needed docker
-
-echo -e "${YELLOW}[SCRIPT] Starting docker service${NC}"
-systemctl start docker.service
-systemctl enable docker.service
+apt install apt-transport-https ca-certificates curl software-properties-common
+curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu focal stable"
+apt install docker-ce
 
 KUBECTL=/usr/local/bin/kubectl
 if [ -f "$KUBECTL" ]; then

@@ -13,7 +13,10 @@ fi
 echo -e "${YELLOW}[SCRIPT] Creating cluster and waiting${NC}"
 k3d cluster create dev-cluster --api-port 6443 --port 8080:80@loadbalancer --port 8888:8888@loadbalancer --wait
 
-sleep 20
+sleep 5
+
+echo -e "${YELLOW}[SCRIPT] Waiting for cluster to be ready${NC}"
+kubectl wait --for=condition=Ready pods --all -n kube-system
 
 echo -e "${YELLOW}[SCRIPT] Creating namespaces${NC}"
 kubectl create namespace argocd
@@ -31,7 +34,6 @@ echo -e "${YELLOW}[SCRIPT] Applying argocd project and application manifests${NC
 kubectl apply -n argocd -f ../confs
 
 echo -e "${YELLOW}[SCRIPT] Patching argocd-server service${NC}"
-# kubectl port-forward svc/argocd-server -n argocd 8080:443
 kubectl patch svc argocd-server -n argocd -p '{"spec": {"type": "LoadBalancer"}}'
 
 echo -e "${YELLOW}[SCRIPT] Waiting for argocd to be ready${NC}"
