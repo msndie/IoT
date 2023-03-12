@@ -10,6 +10,7 @@ curl -sfL https://get.k3s.io/ | sh -s - --write-kubeconfig-mode 644
 sleep 1
 echo -e "${YELLOW}[SCRIPT] applying manifests${NC}"
 kubectl apply -f /vagrant/confs
+sleep 1
 echo -e "${YELLOW}[SCRIPT] Waiting for apps to be ready${NC}"
-kubectl wait --for=condition=Ready pods --all -n default
+kubectl wait --for=condition=Ready pods --all -A
 echo -e "${GREEN}[SCRIPT] DONE!${NC}"

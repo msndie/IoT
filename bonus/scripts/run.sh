@@ -21,14 +21,15 @@ fi
 echo -e "${YELLOW}[SCRIPT] Creating namespaces${NC}"
 kubectl create namespace gitlab
 
-echo -e "${YELLOW} Deploying gitlab${NC}"
+echo -e "${YELLOW}[SCRIPT] Deploying gitlab${NC}"
 helm install gitlab https://gitlab-charts.s3.amazonaws.com/gitlab-6.9.2.tgz \
   -n gitlab \
-  -f https://gitlab.com/gitlab-org/charts/gitlab/raw/master/examples/values-minikube-minimum.yaml
+  -f ../confs/min-gitlab.yaml
   --timeout 600s \
-  --set global.hosts.domain=example.com \
-  --set global.hosts.externalIP=localhost \
+  --set global.hosts.domain=127.0.0.1 \
+  --set global.hosts.externalIP=127.0.0.1 \
   --set global.edition=ce
 
-echo -e "${YELLOW} Waiting for gitlab${NC}"
+echo -e "${YELLOW}[SCRIPT] Waiting for gitlab${NC}"
+sudo kubectl wait --for=condition=available deployments --all -n gitlab
 sudo kubectl wait --for=condition=available deployments --all -n gitlab

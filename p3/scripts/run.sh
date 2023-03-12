@@ -11,7 +11,7 @@ if [ "$EUID" -ne 0 ]
 fi
 
 echo -e "${YELLOW}[SCRIPT] Creating cluster and waiting${NC}"
-k3d cluster create dev-cluster --api-port 6443 --port 8080:80@loadbalancer --port 8888:8888@loadbalancer --wait
+k3d cluster create dev-cluster --k3s-arg "--disable=traefik@server:0" --api-port 6443 --port 8080:80@loadbalancer --port 8888:8888@loadbalancer --wait
 
 sleep 5
 
